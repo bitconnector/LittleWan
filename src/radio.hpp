@@ -46,8 +46,8 @@ public:
     void writeState(Radio_State state);
     void writeFrequency(uint32_t frequency);
     void writeSendingParams(int spreading_factor, int powerlevel, int bandwidth);
-    void writeBaseConfig();
-    void init(); //overwrite all settings needed
+    // void writeBaseConfig();
+    // void init(); //overwrite all settings needed
 
     //actions
     void sendPackage();

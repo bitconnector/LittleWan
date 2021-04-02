@@ -86,27 +86,6 @@ void Radio::writeSendingParams(int sf, int pa, int bw)
     writeReg(29, (bw << 4) | 0x02);   //x kHz 4/5 coding rate explicit header mode
 }
 
-void Radio::writeBaseConfig()
-{
-    writeReg(38, 0x04); //Mobile node, low datarate optimization on AGC acorging to register LnaGain
-    writeReg(31, 0x25); //Rx Timeout set to 37 symbols
-    writeReg(32, 0x00); //set Preamble length set to 8 symbols
-    writeReg(33, 0x08);
-    writeReg(57, 0x34);   //Set LoRaWan sync word
-    writeReg(0x0E, 0x80); //set tx Fifo addr
-    writeReg(0x0F, 0x00); //set rx Fifo addr
-}
-
-void Radio::init()
-{
-    Serial.println("-> init Radio");
-    writeState(Radio_State::STDBY); //enable lora mode (must be standby mode)
-    writeBaseConfig();
-    writeFrequency(0);
-    writeSendingParams(7, 14, 7);
-    //writeState(Radio_State::sleep); //shutdown the lora module
-}
-
 void Radio::sendPackage()
 {
     writeState(Radio_State::STDBY); //switch to sending
