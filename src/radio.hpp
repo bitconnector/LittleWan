@@ -46,8 +46,6 @@ public:
     void writeState(Radio_State state);
     void writeFrequency(uint32_t frequency);
     void writeSendingParams(int spreading_factor, int powerlevel, int bandwidth);
-    // void writeBaseConfig();
-    // void init(); //overwrite all settings needed
 
     //actions
     void sendPackage();
@@ -63,9 +61,4 @@ public:
 protected:
     int cs_pin;
     SPIClass spi;
-
-    // int spreading_factor = 7;       //SF7 -> 10
-    // int palevel = 14;               //14 maximum with RFO
-    // int bandwidth = 0x07;           //BW125 -> 0x08 BW250
-    //uint32_t frequency = 868100000; //Frequency channel 1
 };
