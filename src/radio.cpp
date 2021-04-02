@@ -62,13 +62,28 @@ void Radio::writeFrequency(uint32_t _frequency)
     // writeReg(8, 0x8B);
 }
 
-void Radio::writeSendingParams()
+void Radio::writeSendingParams(int sf, int pa, int bw)
 {
-    Serial.println("-> write sending params: pa=" + String(palevel) + " sf=" + String(spreading_factor) + " bw=" + String(bandwidth));
-    writeReg(9, 0x70 | palevel);                    //powerlevel in dBm TODO: PA BOOST
-    writeReg(12, 0x23);                             //LNA boost on
-    writeReg(30, (spreading_factor << 4) | 0b0100); //set SF and CRC on
-    writeReg(29, (bandwidth << 4) | 0x02);          //x kHz 4/5 coding rate explicit header mode
+    if (sf < 7)
+        sf = 7;
+    else if (sf > 10)
+        sf = 10;
+
+    if (pa < 0)
+        pa = 0;
+    else if (pa > 14)
+        pa = 14;
+
+    if (bw < 7)
+        bw = 7;
+    else if (bw > 8)
+        bw = 8;
+
+    Serial.println("-> write sending params: pa=" + String(pa) + " sf=" + String(sf) + " bw=" + String(bw));
+    writeReg(9, 0x70 | pa);           //powerlevel in dBm TODO: PA BOOST
+    writeReg(12, 0x23);               //LNA boost on
+    writeReg(30, (sf << 4) | 0b0100); //set SF and CRC on
+    writeReg(29, (bw << 4) | 0x02);   //x kHz 4/5 coding rate explicit header mode
 }
 
 void Radio::writeBaseConfig()
@@ -88,35 +103,8 @@ void Radio::init()
     writeState(Radio_State::STDBY); //enable lora mode (must be standby mode)
     writeBaseConfig();
     writeFrequency(0);
-    writeSendingParams();
+    writeSendingParams(7, 14, 7);
     //writeState(Radio_State::sleep); //shutdown the lora module
-}
-
-void Radio::setSF(int sf)
-{
-    if (sf < 7)
-        sf = 7;
-    else if (sf > 10)
-        sf = 10;
-    spreading_factor = sf;
-}
-
-void Radio::setPaLevel(int pa)
-{
-    if (pa < 0)
-        pa = 0;
-    else if (pa > 14)
-        pa = 14;
-    palevel = pa;
-}
-
-void Radio::setBW(int bw)
-{
-    if (bw < 7)
-        bw = 7;
-    else if (bw > 8)
-        bw = 8;
-    bandwidth = bw;
 }
 
 void Radio::sendPackage()
@@ -133,16 +121,6 @@ void Radio::sendPackage()
         writeReg(0, Data[i]);
     }
     writeState(Radio_State::TX); //send the Packet
-}
-
-void Radio::reciveSinglePackage()
-{
-    writeState(Radio_State::RXSINGLE);
-}
-
-void Radio::reciveContinousPackage()
-{
-    writeState(Radio_State::RXCONTINUOUS);
 }
 
 void Radio::readPackage()

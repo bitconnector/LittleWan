@@ -15,7 +15,7 @@ void LoraWan::sendMessage()
     //packMessage
     radio.sendPackage();
     //wait tx done
-    radio.reciveSinglePackage();
+    radio.writeState(Radio_State::RXSINGLE);
     //wait rx done/timeout
     //evaluate message
 }

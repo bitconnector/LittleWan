@@ -45,34 +45,27 @@ public:
     //translate settings onto Hardware
     void writeState(Radio_State state);
     void writeFrequency(uint32_t frequency);
-    void writeSendingParams();
+    void writeSendingParams(int spreading_factor, int powerlevel, int bandwidth);
     void writeBaseConfig();
     void init(); //overwrite all settings needed
 
-    //set parameters
-    void setSF(int sf);
-    void setPaLevel(int pa);
-    void setBW(int bw);
-
     //actions
     void sendPackage();
-    void reciveSinglePackage();
-    void reciveContinousPackage();
     void readPackage();
-    byte readPackageSize();
     void clearIrqFlags(Radio_IRQ); //probably already cleared by get Operation
 
     //get information
     Radio_State getState();
     int getModemState();
     Radio_IRQ getIrqFlags();
+    byte readPackageSize();
 
 protected:
     int cs_pin;
     SPIClass spi;
 
-    int spreading_factor = 7;       //SF7 -> 10
-    int palevel = 14;               //14 maximum with RFO
-    int bandwidth = 0x07;           //BW125 -> 0x08 BW250
-    uint32_t frequency = 868100000; //Frequency channel 1
+    // int spreading_factor = 7;       //SF7 -> 10
+    // int palevel = 14;               //14 maximum with RFO
+    // int bandwidth = 0x07;           //BW125 -> 0x08 BW250
+    //uint32_t frequency = 868100000; //Frequency channel 1
 };
