@@ -1,3 +1,6 @@
+/* Interface for the Radio to read and write its config.
+*/
+
 #pragma once
 
 #include <Arduino.h>

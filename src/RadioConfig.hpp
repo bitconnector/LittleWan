@@ -1,3 +1,7 @@
+/* Stores all config-parameters for the Radio to have the correct regional settings.
+It also handles the different Radio states.
+*/
+
 #pragma once
 
 #include "radio.hpp"
