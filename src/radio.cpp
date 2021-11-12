@@ -28,7 +28,7 @@ char Radio::readReg(char addr)
     RFM_Data = spi.transfer(0x00); //Send 0x00 to be able to receive the answer from the RFM
     digitalWrite(cs_pin, HIGH);
     spi.endTransaction();
-#ifdef DEBUG
+#ifdef DEBUG_SPI
     Serial.print("# radio ");
     if (RFM_Status < 0x10)
         Serial.print("0");
@@ -41,7 +41,7 @@ char Radio::readReg(char addr)
     if (RFM_Data < 0x10)
         Serial.print("0");
     Serial.print(RFM_Data, HEX);
-#ifdef DEBUG_BIN
+#ifdef DEBUG_SPI_BIN
     Serial.print("(");
     for (char i = 0x80; i > RFM_Data; i >>= 1)
         Serial.print("0");
@@ -63,7 +63,7 @@ void Radio::writeReg(char addr, char data)
     RFM_Data = spi.transfer(data);
     digitalWrite(cs_pin, HIGH);
     spi.endTransaction();
-#ifdef DEBUG
+#ifdef DEBUG_SPI
     Serial.print("# radio ");
     if (RFM_Status < 0x10)
         Serial.print("0");
@@ -76,7 +76,7 @@ void Radio::writeReg(char addr, char data)
     if (data < 0x10)
         Serial.print("0");
     Serial.print(data, HEX);
-#ifdef DEBUG_BIN
+#ifdef DEBUG_SPI_BIN
     Serial.print("(");
     for (char i = 0x80; i > data; i >>= 1)
         Serial.print("0");
@@ -161,17 +161,27 @@ void Radio::sendPackage()
     data[12] = 0x00;
     data[13] = 0x00;
 
+#ifdef DEBUG
+    Serial.println("-> start sending");
+#endif
+
     writeState(Radio_State::STDBY); //switch to sending
     //in future switch channel,datarate
 
     writeReg(34, _payload_size); //Set the Payload size
 
     char txptr = readReg(14);
-    writeReg(13, txptr);                    //Set the Pointer to the start of the tx FiFo
+    writeReg(13, txptr); //Set the Pointer to the start of the tx FiFo
+#ifdef DEBUG
+    Serial.println("-> upload data");
+#endif
     for (int i = 0; i < _payload_size; i++) //Load the payload to the Radio
     {
         writeReg(0, data[i]);
     }
+#ifdef DEBUG
+    Serial.println("-> upload data done starting tx");
+#endif
     writeState(Radio_State::TX); //send the Packet
 }
 

@@ -7,7 +7,8 @@
 #include <SPI.h>
 
 #define DEBUG
-#define DEBUG_BIN
+#define DEBUG_SPI
+#define DEBUG_SPI_BIN
 
 enum class Radio_State : byte
 {
