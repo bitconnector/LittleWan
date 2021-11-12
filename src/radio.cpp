@@ -1,20 +1,16 @@
 #include "radio.hpp"
 
 Radio::Radio()
-{
-    cs_pin = 7;
-    spi = SPI;
-}
+    : Radio(7) {}
 
 Radio::Radio(int _cs)
-{
-    cs_pin = _cs;
-    spi = SPI;
-}
+    : Radio(_cs, SPI) {}
 
 Radio::Radio(int _cs, SPIClass _spi)
 {
     cs_pin = _cs;
+    pinMode(cs_pin, OUTPUT);
+    digitalWrite(cs_pin, HIGH);
     spi = _spi;
 }
 
@@ -114,7 +110,7 @@ void Radio::writeFrequency(uint32_t frequency)
 #endif
     float freq = frequency / 61.035;
     frequency = freq;
-    writeBinFrequency((uint8_t *) (&frequency));
+    writeBinFrequency((uint8_t *)(&frequency));
 }
 
 void Radio::writeSendingParams(int sf, int pa, int bw)
