@@ -12,6 +12,7 @@ Radio::Radio(int _cs, SPIClass _spi)
     pinMode(cs_pin, OUTPUT);
     digitalWrite(cs_pin, HIGH);
     spi = _spi;
+    spi.begin();
 }
 
 Radio::~Radio()
@@ -24,7 +25,7 @@ char Radio::readReg(char addr)
     spi.beginTransaction(SPISettings(4000000, MSBFIRST, SPI_MODE0));
     digitalWrite(cs_pin, LOW);
     RFM_Status = spi.transfer(addr);
-    RFM_Data = SPI.transfer(0x00); //Send 0x00 to be able to receive the answer from the RFM
+    RFM_Data = spi.transfer(0x00); //Send 0x00 to be able to receive the answer from the RFM
     digitalWrite(cs_pin, HIGH);
     spi.endTransaction();
 #ifdef DEBUG
