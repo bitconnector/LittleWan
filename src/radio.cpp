@@ -100,11 +100,11 @@ void Radio::writeState(Radio_State state)
     writeReg(1, (char)state);
 }
 
-void Radio::writeBinFrequency(uint32_t frequency)
+void Radio::writeBinFrequency(uint8_t frequency[3])
 {
-    writeReg(6, frequency >> 16);
-    writeReg(7, frequency >> 8);
-    writeReg(8, frequency);
+    writeReg(6, frequency[2]);
+    writeReg(7, frequency[1]);
+    writeReg(8, frequency[0]);
 }
 
 void Radio::writeFrequency(uint32_t frequency)
@@ -114,7 +114,7 @@ void Radio::writeFrequency(uint32_t frequency)
 #endif
     float freq = frequency / 61.035;
     frequency = freq;
-    writeBinFrequency(frequency);
+    writeBinFrequency((uint8_t *) (&frequency));
 }
 
 void Radio::writeSendingParams(int sf, int pa, int bw)

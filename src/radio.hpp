@@ -51,7 +51,7 @@ public:
     //translate settings onto Hardware
     void writeState(Radio_State state);
     void writeFrequency(uint32_t frequency);
-    void writeBinFrequency(uint32_t frequency);
+    void writeBinFrequency(uint8_t frequency[3]);
     void writeSendingParams(int spreading_factor, int powerlevel, int bandwidth);
 
     //actions
