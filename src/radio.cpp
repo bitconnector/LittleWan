@@ -46,7 +46,7 @@ char Radio::readReg(char addr)
     Serial.print(RFM_Data, HEX);
 #ifdef DEBUG_BIN
     Serial.print("(");
-    for (char i = 0xFF; i > RFM_Data; i >>= 1)
+    for (char i = 0x80; i > RFM_Data; i >>= 1)
         Serial.print("0");
     if (RFM_Data)
         Serial.print(RFM_Data, BIN);
@@ -81,7 +81,7 @@ void Radio::writeReg(char addr, char data)
     Serial.print(data, HEX);
 #ifdef DEBUG_BIN
     Serial.print("(");
-    for (char i = 0xFF; i > data; i >>= 1)
+    for (char i = 0x80; i > data; i >>= 1)
         Serial.print("0");
     if (data)
         Serial.print(data, BIN);
