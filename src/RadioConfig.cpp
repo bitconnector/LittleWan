@@ -34,7 +34,8 @@ void RadioConfig::writeBaseConfig()
 void RadioConfig::init()
 {
     Serial.println("-> init Radio");
-    radio.writeState(Radio_State::STDBY); //enable lora mode (must be standby mode)
+    radio.writeState(Radio_State::SLEEP); //enable lora mode (must be sleep mode)
+    radio.writeState(Radio_State::STDBY); //switch to standby
     writeBaseConfig();
     radio.writeFrequency(868100000);
     radio.writeSendingParams(7, 14, 7);

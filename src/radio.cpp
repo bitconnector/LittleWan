@@ -142,16 +142,35 @@ void Radio::writeSendingParams(int sf, int pa, int bw)
 
 void Radio::sendPackage()
 {
-    writeState(Radio_State::STDBY); //switch to sending
+    const int _payload_size = 14;
+    char data[_payload_size];
 
-    int _payload_size = 5;
+    data[0] = 0x40; //[0] MHDR -> unconfirmed uplink
+    data[1] = 0x26; //[1-4] FHDR.DevAddr
+    data[2] = 0x0B;
+    data[3] = 0x70;
+    data[4] = 0x92;
+    data[5] = 0x00; //[5] FHDR.FCtrl (frame control)
+    data[6] = 0x00; //[6-7] FHDR.FCnt (frame counter)
+    data[7] = 0x01;
+    //optional FHDR.Opts (FOptsLen in FCtrl)
+    data[8] = 0x01;  //[8] FPort (1-255 -> AppSKey / 0 -> NwkSKey)
+    data[9] = 0x23;  //[9] FRMPayload (not encrypted for now)
+    data[10] = 0x00; //[10-13] MIC
+    data[11] = 0x00;
+    data[12] = 0x00;
+    data[13] = 0x00;
+
+    writeState(Radio_State::STDBY); //switch to sending
+    //in future switch channel,datarate
+
     writeReg(34, _payload_size); //Set the Payload size
 
-    char Data[] = "hallo";
-    writeReg(13, 0x80);                     //Set the Pointer to the start of the tx FiFo
+    char txptr = readReg(14);
+    writeReg(13, txptr);                    //Set the Pointer to the start of the tx FiFo
     for (int i = 0; i < _payload_size; i++) //Load the payload to the Radio
     {
-        writeReg(0, Data[i]);
+        writeReg(0, data[i]);
     }
     writeState(Radio_State::TX); //send the Packet
 }
