@@ -19,6 +19,17 @@ Radio::~Radio()
 {
 }
 
+void Radio::resetWithPin(int reset_pin)
+{
+    pinMode(reset_pin, OUTPUT);
+    digitalWrite(reset_pin, HIGH);
+    delay(10);
+    digitalWrite(reset_pin, LOW);
+    delay(10);
+    digitalWrite(reset_pin, HIGH);
+    delay(50); //wait for radio to catch up
+}
+
 char Radio::readReg(char addr)
 {
     char RFM_Data, RFM_Status;

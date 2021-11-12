@@ -59,6 +59,7 @@ public:
     void sendPackage();
     void readPackage();
     void clearIrqFlags(Radio_IRQ); //probably already cleared by get Operation
+    void resetWithPin(int reset_pin);
 
     //get information
     Radio_State getState();
