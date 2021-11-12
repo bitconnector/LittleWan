@@ -24,24 +24,75 @@ Radio::~Radio()
 
 char Radio::readReg(char addr)
 {
-    char RFM_Data;
+    char RFM_Data, RFM_Status;
     spi.beginTransaction(SPISettings(4000000, MSBFIRST, SPI_MODE0));
     digitalWrite(cs_pin, LOW);
-    spi.transfer(addr);
+    RFM_Status = spi.transfer(addr);
     RFM_Data = SPI.transfer(0x00); //Send 0x00 to be able to receive the answer from the RFM
     digitalWrite(cs_pin, HIGH);
     spi.endTransaction();
+#ifdef DEBUG
+    Serial.print("# radio ");
+    if (RFM_Status < 0x10)
+        Serial.print("0");
+    Serial.print(RFM_Status, HEX);
+    Serial.print(" read: ");
+    if (addr < 0x10)
+        Serial.print("0");
+    Serial.print(addr, HEX);
+    Serial.print(" = ");
+    if (RFM_Data < 0x10)
+        Serial.print("0");
+    Serial.print(RFM_Data, HEX);
+#ifdef DEBUG_BIN
+    Serial.print("(");
+    for (char i = 0xFF; i > RFM_Data; i >>= 1)
+        Serial.print("0");
+    if (RFM_Data)
+        Serial.print(RFM_Data, BIN);
+    Serial.print(")");
+#endif
+    Serial.println("");
+#endif
     return RFM_Data;
 }
 
 void Radio::writeReg(char addr, char data)
 {
+    char RFM_Data, RFM_Status;
     spi.beginTransaction(SPISettings(4000000, MSBFIRST, SPI_MODE0));
     digitalWrite(cs_pin, LOW);
-    spi.transfer(addr | 0x80); //Send Address with MSB 1 to make it a write command
-    spi.transfer(data);
+    RFM_Status = spi.transfer(addr | 0x80); //Send Address with MSB 1 to make it a write command
+    RFM_Data = spi.transfer(data);
     digitalWrite(cs_pin, HIGH);
     spi.endTransaction();
+#ifdef DEBUG
+    Serial.print("# radio ");
+    if (RFM_Status < 0x10)
+        Serial.print("0");
+    Serial.print(RFM_Status, HEX);
+    Serial.print(" writ: ");
+    if (addr < 0x10)
+        Serial.print("0");
+    Serial.print(addr, HEX);
+    Serial.print(" = ");
+    if (data < 0x10)
+        Serial.print("0");
+    Serial.print(data, HEX);
+#ifdef DEBUG_BIN
+    Serial.print("(");
+    for (char i = 0xFF; i > data; i >>= 1)
+        Serial.print("0");
+    if (data)
+        Serial.print(data, BIN);
+    Serial.print(")");
+#endif
+    Serial.print(" -> ");
+    if (RFM_Data < 0x10)
+        Serial.print("0");
+    Serial.print(RFM_Data, HEX);
+    Serial.println("");
+#endif
 }
 
 void Radio::writeState(Radio_State state)
@@ -49,17 +100,21 @@ void Radio::writeState(Radio_State state)
     writeReg(1, (char)state);
 }
 
-void Radio::writeFrequency(uint32_t _frequency)
+void Radio::writeBinFrequency(uint32_t frequency)
 {
-    float freq = _frequency / 61.035;
-    _frequency = freq;
-    Serial.println("-> write frequency: " + String(_frequency));
-    writeReg(6, _frequency >> 16);
-    writeReg(7, _frequency >> 8);
-    writeReg(8, _frequency);
-    // writeReg(6, 0xD9); //Channel [0], 868.1 MHz / 61.035 Hz = 14222987 = 0xD9068B
-    // writeReg(7, 0x06);
-    // writeReg(8, 0x8B);
+    writeReg(6, frequency >> 16);
+    writeReg(7, frequency >> 8);
+    writeReg(8, frequency);
+}
+
+void Radio::writeFrequency(uint32_t frequency)
+{
+#ifdef DEBUG
+    Serial.println("-> write frequency: " + String(frequency));
+#endif
+    float freq = frequency / 61.035;
+    frequency = freq;
+    writeBinFrequency(frequency);
 }
 
 void Radio::writeSendingParams(int sf, int pa, int bw)
@@ -79,7 +134,9 @@ void Radio::writeSendingParams(int sf, int pa, int bw)
     else if (bw > 8)
         bw = 8;
 
+#ifdef DEBUG
     Serial.println("-> write sending params: pa=" + String(pa) + " sf=" + String(sf) + " bw=" + String(bw));
+#endif
     writeReg(9, 0x70 | pa);           //powerlevel in dBm TODO: PA BOOST
     writeReg(12, 0x23);               //LNA boost on
     writeReg(30, (sf << 4) | 0b0100); //set SF and CRC on

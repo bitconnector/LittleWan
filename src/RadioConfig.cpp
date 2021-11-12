@@ -36,7 +36,7 @@ void RadioConfig::init()
     Serial.println("-> init Radio");
     radio.writeState(Radio_State::STDBY); //enable lora mode (must be standby mode)
     writeBaseConfig();
-    radio.writeFrequency(0);
+    radio.writeFrequency(868100000);
     radio.writeSendingParams(7, 14, 7);
     //writeState(Radio_State::sleep); //shutdown the lora module
 }

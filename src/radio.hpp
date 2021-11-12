@@ -6,6 +6,9 @@
 #include <Arduino.h>
 #include <SPI.h>
 
+#define DEBUG
+#define DEBUG_BIN
+
 enum class Radio_State : byte
 {
     SLEEP = 0x80,
@@ -48,6 +51,7 @@ public:
     //translate settings onto Hardware
     void writeState(Radio_State state);
     void writeFrequency(uint32_t frequency);
+    void writeBinFrequency(uint32_t frequency);
     void writeSendingParams(int spreading_factor, int powerlevel, int bandwidth);
 
     //actions
