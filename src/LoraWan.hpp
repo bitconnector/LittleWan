@@ -24,7 +24,7 @@ public:
     int setFRMPayload(char *buf, int offset, char *data, uint8_t port);
 
     void encryptPayload(char *buf, char *key, char *data);
-    int calculateMIC(char *buf, uint8_t size, bool direction);
+    int calculateMIC(char *buf, uint8_t size, bool direction, unsigned char *Key);
 
 protected:
     unsigned char DevAddr[4];

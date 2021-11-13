@@ -157,6 +157,10 @@ void Radio::sendPackage(char *data, uint8_t size)
     Serial.println("-> start sending");
 #endif
     writeState(Radio_State::STDBY); //switch to sending
+
+    writeReg(30, (7 << 4) | 0b0100); //SFx | CRC on
+    writeReg(29, (8 << 4) | 0x02);   //bw | 4/5 coding rate explicit header mode
+
     //in future switch channel,datarate
 
     writeReg(34, size); //Set the Payload size

@@ -16,8 +16,9 @@ void RadioConfig::sendMessage()
 {
     //packMessage
     const int _payload_size = 14;
-    char data[_payload_size];
+    //char data[_payload_size];
 
+    /*
     data[0] = 0x40; //[0] MHDR -> unconfirmed uplink
     data[1] = 0x26; //[1-4] FHDR.DevAddr
     data[2] = 0x0B;
@@ -33,8 +34,10 @@ void RadioConfig::sendMessage()
     data[11] = 0x00;
     data[12] = 0x00;
     data[13] = 0x00;
+    */
+    char data[] = {0x40, 0x0f, 0x07, 0x01, 0x06, 0x00, 0x23, 0x00, 0xc0, 0x8d, 0xee, 0x1c};
 
-    radio.sendPackage(data, _payload_size);
+    radio.sendPackage(data, sizeof(data));
     //wait tx done
     //radio.writeState(Radio_State::RXSINGLE);
     //wait rx done/timeout
