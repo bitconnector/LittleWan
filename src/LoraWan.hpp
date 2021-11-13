@@ -20,9 +20,15 @@ public:
     int setMHDRandFHDR(char *buf);
     int setFRMPayload(char *buf, int offset, char *data, uint8_t port);
 
-    void encryptPayload(char* buf, char* key, char* data);
-    void calculateMIC(char* buf, int size, char* key);
+    void encryptPayload(char *buf, char *key, char *data);
+    void calculateMIC(char *buf, int size, char *key);
 
 protected:
+    unsigned char DevAddr[4];
+    unsigned char NwkSKey[16];
+    unsigned char AppSKey[16];
     uint16_t frameCounterUp, frameCounterDown;
+
+private:
+    unsigned char ASCII2Hex(const char str[2]);
 };
