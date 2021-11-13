@@ -43,7 +43,7 @@ void LoraWan::sendUplink(char *data, uint8_t len, bool confirm, uint8_t port)
         buf[size++] = (char)port;
         //TODO: encrypt data and copy to buf
     }
-    size = calculateMIC(buf, size, 1);
+    size = calculateMIC(buf, size, 1, NwkSKey);
 
     //radio_config.sendMessage();
 #ifdef DEBUG
@@ -74,7 +74,7 @@ int LoraWan::setMHDRandFHDR(char *buf)
     return 8;
 }
 
-int LoraWan::calculateMIC(char *buf, uint8_t size, bool direction)
+int LoraWan::calculateMIC(char *buf, uint8_t size, bool direction, unsigned char *Key)
 {
     unsigned char MIC_Data[200] = {0}; //TODO: actual size
     MIC_Data[0] = 0x49;
@@ -102,9 +102,139 @@ int LoraWan::calculateMIC(char *buf, uint8_t size, bool direction)
     {
         MIC_Data[i + 16] = buf[i];
     }
+    uint8_t mic_size = 16 + size;
+
+    unsigned char Key_K1[16] = {0};
+    unsigned char Key_K2[16] = {0};
+    unsigned char New_Data[16] = {0};
+
+    unsigned char Number_of_Blocks = mic_size / 16;
+    unsigned char Incomplete_Block_Size = mic_size % 16;
+    if (Incomplete_Block_Size != 0)
+    {
+        Number_of_Blocks++;
+        MIC_Data[mic_size] = 0x80;
+        for (int i = mic_size; i < (Number_of_Blocks * 16); i++)
+        {
+            MIC_Data[i] = 0;
+        }
+    }
+
+    Generate_Keys(Key, Key_K1, Key_K2);
+    for (uint8_t j = 0; j < (Number_of_Blocks - 1); j++)
+    {
+        //Copy new data and XOR with old
+        for (uint8_t i = 0; i < 16; i++)
+        {
+            New_Data[i] ^= MIC_Data[(j * 16) + i];
+        }
+        AES_Encrypt(New_Data, Key);
+    }
+    if (Incomplete_Block_Size == 0)
+    {
+        //Copy last data into array
+        for (uint8_t i = 0; i < 16; i++)
+        {
+            New_Data[i] ^= MIC_Data[((Number_of_Blocks - 1) * 16) + i];
+            MIC_Data[i] ^= Key_K1[i];
+        }
+    }
+    else
+    {
+        //Copy the remaining data and fill the rest
+        for (uint8_t i = 0; i < 16; i++)
+        {
+            New_Data[i] ^= MIC_Data[((Number_of_Blocks - 1) * 16) + i];
+            MIC_Data[i] ^= Key_K2[i];
+        }
+    }
+    //Perform last AES routine
+    AES_Encrypt(New_Data, Key);
+
     //TODO: Calculate MIC and append
-    //return size+4;
-    return size;
+    for (int8_t i = 0; i < 4; i++)
+        buf[size + i] = New_Data[i];
+    return size + 4;
+}
+
+void LoraWan::Generate_Keys(unsigned char *Key, unsigned char *K1, unsigned char *K2)
+{
+    unsigned char MSB_Key;
+    AES_Encrypt(K1, Key);
+
+    if ((K1[0] & 0x80) == 0x80)
+    {
+        MSB_Key = 1;
+    }
+    else
+    {
+        MSB_Key = 0;
+    }
+
+    //Shift K1 one bit left
+    Shift_Left(K1);
+
+    //if MSB was 1
+    if (MSB_Key == 1)
+    {
+        K1[15] = K1[15] ^ 0x87;
+    }
+
+    //Copy K1 to K2
+    for (char i = 0; i < 16; i++)
+    {
+        K2[i] = K1[i];
+    }
+
+    //Check if MSB is 1
+    if ((K2[0] & 0x80) == 0x80)
+    {
+        MSB_Key = 1;
+    }
+    else
+    {
+        MSB_Key = 0;
+    }
+
+    //Shift K2 one bit left
+    Shift_Left(K2);
+
+    //Check if MSB was 1
+    if (MSB_Key == 1)
+    {
+        K2[15] = K2[15] ^ 0x87;
+    }
+}
+
+void LoraWan::Shift_Left(unsigned char *Data)
+{
+    unsigned char i;
+    unsigned char Overflow = 0;
+    //unsigned char High_Byte, Low_Byte;
+
+    for (i = 0; i < 16; i++)
+    {
+        //Check for overflow on next byte except for the last byte
+        if (i < 15)
+        {
+            //Check if upper bit is one
+            if ((Data[i + 1] & 0x80) == 0x80)
+            {
+                Overflow = 1;
+            }
+            else
+            {
+                Overflow = 0;
+            }
+        }
+        else
+        {
+            Overflow = 0;
+        }
+
+        //Shift one left
+        Data[i] = (Data[i] << 1) + Overflow;
+    }
 }
 
 unsigned char LoraWan::ASCII2Hex(const char str[2])

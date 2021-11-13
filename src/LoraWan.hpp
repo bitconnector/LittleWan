@@ -4,6 +4,7 @@
 #pragma once
 
 #include "RadioConfig.hpp"
+#include "AES-128.h"
 
 class LoraWan
 {
@@ -35,4 +36,6 @@ protected:
 
 private:
     unsigned char ASCII2Hex(const char str[2]);
+    void Generate_Keys(unsigned char *Key, unsigned char *K1, unsigned char *K2);
+    void Shift_Left(unsigned char *Data);
 };
