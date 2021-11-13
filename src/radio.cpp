@@ -156,10 +156,48 @@ void Radio::sendPackage(char *data, uint8_t size)
 #ifdef DEBUG
     Serial.println("-> start sending");
 #endif
-    writeState(Radio_State::STDBY); //switch to sending
+    //writeState(Radio_State::STDBY); //switch to sending
+
+    writeReg(0x01, 0x00); //sleep
+    writeReg(0x01, 0x80); //enable lora
+    writeReg(0x09, 0xff);
+    writeReg(0x1f, 0x25);
+    writeReg(0x20, 0x00);
+    writeReg(0x21, 0x08);
+    writeReg(0x26, 0x0c);
+    writeReg(0x39, 0x34);
+    writeReg(0x33, 0x27);
+    writeReg(0x3b, 0x1d);
+    writeReg(0x0e, 0x80);
+    writeReg(0x0f, 0x00);
+
+    delay(200);
+
+    writeReg(0x01, 0x81); //enable lora standby
+    delay(10);
+
+    writeReg(0x06, 0xd9);
+    writeReg(0x07, 0x06);
+    writeReg(0x08, 0x8b);
+
+    writeReg(0x1e, 0x74); //_sf //SF7BW125
+    writeReg(0x1d, 0x72); //_bw
+
+    writeReg(0x26, 0x04); //_modemcfg
+
+    /*
+    delay(20);
+    writeReg(1, 1); //Switch to standby
+
+    writeReg(77, 0x87);               // High Power +20 dBm Operation (Semtech SX1276/77/78/79 5.4.3.)
+    writeReg(11, 0x20 | (0x1F & 17)); //RFM_Set_OCP(140)
+    writeReg(9, 0x80 | 15);           //RFM_Set_Tx_Power()
 
     writeReg(30, (7 << 4) | 0b0100); //SFx | CRC on
     writeReg(29, (8 << 4) | 0x02);   //bw | 4/5 coding rate explicit header mode
+
+    writeReg(12, 0x23); //LNA boost on
+    */
 
     //in future switch channel,datarate
 
@@ -177,7 +215,8 @@ void Radio::sendPackage(char *data, uint8_t size)
 #ifdef DEBUG
     Serial.println("-> upload data done starting tx");
 #endif
-    writeState(Radio_State::TX); //send the Packet
+    //writeState(Radio_State::TX); //send the Packet
+    writeReg(0x01, 0x03); //_sf
 }
 
 void Radio::readPackage()
