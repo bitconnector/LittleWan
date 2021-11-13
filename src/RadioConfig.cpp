@@ -1,6 +1,8 @@
 #include "RadioConfig.hpp"
 #include "radio.hpp"
 
+RadioConfig::RadioConfig() {}
+
 RadioConfig::RadioConfig(Radio &_radio)
 {
     radio = _radio;

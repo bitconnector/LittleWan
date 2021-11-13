@@ -11,6 +11,7 @@ const uint16_t frequencys[] = {8681, 8683, 8685, 8671, 8673, 8675, 8677, 8679};
 class RadioConfig
 {
 public:
+    RadioConfig();
     RadioConfig(Radio &_radio);
     ~RadioConfig();
 

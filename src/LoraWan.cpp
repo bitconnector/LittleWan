@@ -1,8 +1,14 @@
 #include "LoraWan.hpp"
-
-LoraWan::LoraWan(RadioConfig &_radio_cfg) {}
+#include "RadioConfig.hpp"
 
 LoraWan::~LoraWan() {}
+
+LoraWan::LoraWan() {}
+
+LoraWan::LoraWan(RadioConfig &_radio_cfg)
+{
+    radio_config = _radio_cfg;
+}
 
 void LoraWan::setNwkSKey(const char *NwkKey_in)
 {
@@ -28,7 +34,35 @@ void LoraWan::setFrameCounter(uint16_t up, uint16_t down)
     frameCounterDown = down;
 }
 
-void LoraWan::calculateMIC(char *buf, uint8_t size, bool direction)
+void LoraWan::sendUplink(char *data, uint8_t len, bool confirm, uint8_t port)
+{
+    char buf[200] = {0};
+    int size = setMHDRandFHDR(buf);
+    if (len > 0)
+    {
+        buf[size++] = (char)port;
+        //TODO: encrypt data and copy to buf
+    }
+    size = calculateMIC(buf, size, 1);
+
+    //radio_config.sendMessage();
+}
+
+int LoraWan::setMHDRandFHDR(char *buf)
+{
+    buf[0] = 0x40;       //[0] MHDR -> unconfirmed uplink
+    buf[1] = DevAddr[3]; //[1-4] FHDR.DevAddr
+    buf[2] = DevAddr[2];
+    buf[3] = DevAddr[1];
+    buf[4] = DevAddr[0];
+    buf[5] = 0x00;                      //[5] FHDR.FCtrl (frame control)
+    buf[6] = frameCounterDown & 0x00FF; //[6-7] FHDR.FCnt (frame counter)
+    buf[7] = (frameCounterDown >> 8) & 0x00FF;
+    //optional FHDR.Opts (FOptsLen in FCtrl)
+    return 8;
+}
+
+int LoraWan::calculateMIC(char *buf, uint8_t size, bool direction)
 {
     unsigned char MIC_Data[200] = {0}; //TODO: actual size
     MIC_Data[0] = 0x49;
@@ -41,13 +75,13 @@ void LoraWan::calculateMIC(char *buf, uint8_t size, bool direction)
 
     if (direction)
     {
-        MIC_Data[10] = (frameCounterDown & 0x00FF);
-        MIC_Data[11] = ((frameCounterDown >> 8) & 0x00FF);
+        MIC_Data[10] = frameCounterDown & 0x00FF;
+        MIC_Data[11] = (frameCounterDown >> 8) & 0x00FF;
     }
     else
     {
-        MIC_Data[10] = (frameCounterUp & 0x00FF);
-        MIC_Data[11] = ((frameCounterUp >> 8) & 0x00FF);
+        MIC_Data[10] = frameCounterUp & 0x00FF;
+        MIC_Data[11] = (frameCounterUp >> 8) & 0x00FF;
     }
     //MIC_Data[12-13] = 0; //Frame counter upper bytes
     //MIC_Data[14] = 0;
@@ -57,6 +91,8 @@ void LoraWan::calculateMIC(char *buf, uint8_t size, bool direction)
         MIC_Data[i + 16] = buf[i];
     }
     //TODO: Calculate MIC and append
+    //return size+4;
+    return size;
 }
 
 unsigned char LoraWan::ASCII2Hex(const char str[2])
