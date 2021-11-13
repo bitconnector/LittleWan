@@ -14,7 +14,6 @@ public:
     RadioConfig(Radio &_radio);
     ~RadioConfig();
 
-    //void setKeys();
     void setSendParams();
     void setRecive2Params();
 
