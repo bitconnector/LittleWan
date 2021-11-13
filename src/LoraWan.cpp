@@ -28,8 +28,35 @@ void LoraWan::setFrameCounter(uint16_t up, uint16_t down)
     frameCounterDown = down;
 }
 
-void LoraWan::calculateMIC(char *buf, int size, char *key)
+void LoraWan::calculateMIC(char *buf, uint8_t size, bool direction)
 {
+    unsigned char MIC_Data[200] = {0}; //TODO: actual size
+    MIC_Data[0] = 0x49;
+    // MIC_Data[1-4] = 0;
+    MIC_Data[5] = direction;
+    MIC_Data[6] = DevAddr[3];
+    MIC_Data[7] = DevAddr[2];
+    MIC_Data[8] = DevAddr[1];
+    MIC_Data[9] = DevAddr[0];
+
+    if (direction)
+    {
+        MIC_Data[10] = (frameCounterDown & 0x00FF);
+        MIC_Data[11] = ((frameCounterDown >> 8) & 0x00FF);
+    }
+    else
+    {
+        MIC_Data[10] = (frameCounterUp & 0x00FF);
+        MIC_Data[11] = ((frameCounterUp >> 8) & 0x00FF);
+    }
+    //MIC_Data[12-13] = 0; //Frame counter upper bytes
+    //MIC_Data[14] = 0;
+    MIC_Data[15] = size;
+    for (uint8_t i = 0; i < size; i++) //copy the rest of the actual payload
+    {
+        MIC_Data[i + 16] = buf[i];
+    }
+    //TODO: Calculate MIC and append
 }
 
 unsigned char LoraWan::ASCII2Hex(const char str[2])
