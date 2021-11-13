@@ -46,6 +46,12 @@ void LoraWan::sendUplink(char *data, uint8_t len, bool confirm, uint8_t port)
     size = calculateMIC(buf, size, 1);
 
     //radio_config.sendMessage();
+#ifdef DEBUG
+    Serial.print("+ Uplink:");
+    for (int i = 0; i < size; i++)
+        Serial.printf(" %02x", buf[i]);
+    Serial.println("");
+#endif
 }
 
 int LoraWan::setMHDRandFHDR(char *buf)
@@ -59,6 +65,12 @@ int LoraWan::setMHDRandFHDR(char *buf)
     buf[6] = frameCounterDown & 0x00FF; //[6-7] FHDR.FCnt (frame counter)
     buf[7] = (frameCounterDown >> 8) & 0x00FF;
     //optional FHDR.Opts (FOptsLen in FCtrl)
+#ifdef DEBUG
+    Serial.print("+ MHDR FHDR:");
+    for (int i = 0; i < 8; i++)
+        Serial.printf(" %02x", buf[i]);
+    Serial.println("");
+#endif
     return 8;
 }
 
