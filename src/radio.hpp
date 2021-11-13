@@ -56,7 +56,7 @@ public:
     void writeSendingParams(int spreading_factor, int powerlevel, int bandwidth);
 
     //actions
-    void sendPackage();
+    void sendPackage(char *data, uint8_t size);
     void readPackage();
     void clearIrqFlags(Radio_IRQ); //probably already cleared by get Operation
     void resetWithPin(int reset_pin);
