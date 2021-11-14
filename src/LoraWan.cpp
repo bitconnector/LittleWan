@@ -24,8 +24,20 @@ void LoraWan::setAppSKey(const char *ApskKey_in)
 
 void LoraWan::setDevAddr(const char *devAddr_in)
 {
+#ifdef DEBUG
+    Serial.println(devAddr_in);
+#endif
     for (uint8_t i = 0; i < 4; ++i)
         DevAddr[i] = ASCII2Hex(&devAddr_in[i * 2]);
+#ifdef DEBUG
+    for (int i = 0; i < 4; i++)
+    {
+        if (DevAddr[i] < 0x10)
+            Serial.print("0");
+        Serial.print(DevAddr[i], HEX);
+    }
+    Serial.println("");
+#endif
 }
 
 void LoraWan::setFrameCounter(uint16_t up, uint16_t down)
@@ -250,10 +262,10 @@ unsigned char LoraWan::ASCII2Hex(const char str[2])
     ASCII <<= 4;
     // Low Nibble
     if (str[1] >= 'A' && str[1] <= 'F')
-        ASCII = str[1] - 'A' + 10;
+        ASCII |= str[1] - 'A' + 10;
     else if (str[1] >= 'a' && str[1] <= 'f')
-        ASCII = str[1] - 'a' + 10;
+        ASCII |= str[1] - 'a' + 10;
     else
-        ASCII = str[1] - '0';
+        ASCII |= str[1] - '0';
     return ASCII;
 }
