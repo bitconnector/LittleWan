@@ -51,7 +51,7 @@ void LoraWANmessage::setFRMPayload(uint8_t port, char *buf, uint8_t size)
 
 void LoraWANmessage::setMIC()
 {
-    calculateMIC(frameCounterUp, &data[dataLen]);
+    calculateMIC((char *)data, dataLen, frameCounterUp, &data[dataLen]);
     dataLen += 4;
 }
 
@@ -137,7 +137,7 @@ unsigned char LoraWANmessage::ASCII2Hex(const char str[2])
     return ASCII;
 }
 
-void LoraWANmessage::calculateMIC(uint16_t counter, unsigned char *mic, bool direction)
+void LoraWANmessage::calculateMIC(char *data, uint8_t len, uint16_t counter, unsigned char *mic, bool direction)
 {
     unsigned char MIC_Data[((MAX_DATA_SIZE / 16) + 1) * 16] = {0};
     MIC_Data[0] = 0x49;
@@ -151,11 +151,11 @@ void LoraWANmessage::calculateMIC(uint16_t counter, unsigned char *mic, bool dir
     MIC_Data[11] = counter >> 8;
     //MIC_Data[12-13] = 0; //Frame counter upper bytes
     //MIC_Data[14] = 0;
-    MIC_Data[15] = dataLen;
-    for (int i = 0; i < dataLen; i++) //copy the the payload
+    MIC_Data[15] = len;
+    for (int i = 0; i < len; i++) //copy the the payload
         MIC_Data[i + 16] = data[i];
 
-    unsigned char mic_size = 16 + dataLen;
+    unsigned char mic_size = 16 + len;
     MIC_Data[mic_size] = 0x80;
 
     unsigned char Key_K1[16] = {0};
