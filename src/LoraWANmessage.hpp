@@ -11,6 +11,7 @@ public:
     unsigned char NwkSKey[16];
     unsigned char AppSKey[16];
     unsigned char DevAddr[4];
+    uint16_t frameCounterUp = 0;
     uint16_t frameCounterDown = 0;
     unsigned char data[MAX_DATA_SIZE];
     unsigned char dataLen = 0;
@@ -28,13 +29,16 @@ public:
     unsigned char *getPayload() { return data; }
     unsigned char getPayloadSize() { return dataLen; }
 
+    void setFrameCounterUp(uint16_t up);
     void setFrameCounterDown(uint16_t down);
-    uint16_t getFrameCounterDown() { return frameCounterDown; }
 
     void setMHDR(bool confirm = 0);
     void setFHDR(unsigned char FCtrl = 0, char *FOpts = nullptr);
     void setFRMPayload(uint8_t port, char *data = nullptr, uint8_t len = 0);
     void setMIC();
+
+    bool checkHDR(char *data, uint8_t len);
+    char getFtype(char data);
 
     void calculateMIC(uint16_t counter, unsigned char *mic, bool direction = 0); //default Down
     void Encrypt_Payload(unsigned char *Buffer, unsigned char buffer_size, unsigned char *Key, uint16_t counter, bool direction = 0);

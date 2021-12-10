@@ -20,10 +20,17 @@ void LoraWANmessage::setAppSKey(const char *ApskKey_in)
     for (uint8_t i = 0; i < 16; ++i)
         AppSKey[i] = ASCII2Hex(&ApskKey_in[i * 2]);
 }
+
+void LoraWANmessage::setFrameCounterUp(uint16_t up)
+{
+    frameCounterUp = up;
+}
+
 void LoraWANmessage::setFrameCounterDown(uint16_t down)
 {
     frameCounterDown = down;
 }
+
 void LoraWANmessage::setAPB(const char *devAddr_in, const char *NwkKey_in, const char *ApskKey_in)
 {
     setDevAddr(devAddr_in);
@@ -35,7 +42,7 @@ void LoraWANmessage::setFRMPayload(uint8_t port, char *buf, uint8_t size)
 {
     data[dataLen++] = port;
     if (size != 0)
-        Encrypt_Payload((unsigned char *)buf, size, AppSKey, frameCounterDown);
+        Encrypt_Payload((unsigned char *)buf, size, AppSKey, frameCounterUp);
 
     for (int i = 0; i < size; i++)
         data[i + dataLen] = buf[i];
@@ -44,7 +51,7 @@ void LoraWANmessage::setFRMPayload(uint8_t port, char *buf, uint8_t size)
 
 void LoraWANmessage::setMIC()
 {
-    calculateMIC(frameCounterDown, &data[dataLen]);
+    calculateMIC(frameCounterUp, &data[dataLen]);
     dataLen += 4;
 }
 
@@ -62,9 +69,9 @@ void LoraWANmessage::setFHDR(unsigned char FCtrl, char *FOpts)
     data[2] = DevAddr[2];
     data[3] = DevAddr[1];
     data[4] = DevAddr[0];
-    data[5] = FCtrl;            //[5] FHDR.FCtrl (frame control)
-    data[6] = frameCounterDown; //[6-7] FHDR.FCnt (frame counter)
-    data[7] = frameCounterDown >> 8;
+    data[5] = FCtrl;          //[5] FHDR.FCtrl (frame control)
+    data[6] = frameCounterUp; //[6-7] FHDR.FCnt (frame counter)
+    data[7] = frameCounterUp >> 8;
 
     unsigned char FOptsLen = FCtrl & 0x07; //copy FOpts in FHDR
     for (unsigned char i = 0; i < FOptsLen; i++)
@@ -75,11 +82,38 @@ void LoraWANmessage::setFHDR(unsigned char FCtrl, char *FOpts)
 
 void LoraWANmessage::uplink(char *data, uint8_t len, uint8_t port, bool confirm)
 {
-    frameCounterDown++;
+    frameCounterUp++;
     setMHDR(confirm);
     setFHDR();
     setFRMPayload(port, data, len);
     setMIC();
+}
+
+char LoraWANmessage::getFtype(char data)
+{
+    return data & 0b11100000;
+}
+
+bool LoraWANmessage::checkHDR(char *data, uint8_t len)
+{
+    char mhdr = getFtype(data[0]);
+    if (mhdr != 0x60 && mhdr != 0xA0) //unc down || conf down
+        return false;                 //MHDR.FType doesnt match uplink
+
+    if (data[1] != DevAddr[3] || data[2] != DevAddr[2] || data[3] != DevAddr[1] || data[4] != DevAddr[0])
+        return false; //Wrong DevAddr
+
+    uint16_t down = data[7] << 8 & data[6];
+    if (down <= frameCounterDown)
+        return false;        //message already recived
+    frameCounterDown = down; //get new counter value
+
+    //unsigned char mic[4];
+    //calculateMIC(frameCounterDown, mic, 1);
+
+    //unsigned char payloadOffset = 8 + data[5] & 0x07; //get FOpts len
+
+    return true;
 }
 
 unsigned char LoraWANmessage::ASCII2Hex(const char str[2])
