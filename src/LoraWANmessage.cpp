@@ -108,8 +108,12 @@ bool LoraWANmessage::checkHDR(char *data, uint8_t len)
         return false;            //message already recived
     frameCounterDown = down + 1; //get new counter value
 
-    //unsigned char mic[4];
-    //calculateMIC(frameCounterDown, mic, 1);
+    unsigned char mic[4];
+    unsigned char *micData = (unsigned char *)&data[len - 4];
+    calculateMIC(data, len - 4, down, mic, 1);
+    for (int i = 0; i < 4; i++)
+        if (mic[i] != micData[i])
+            return false;
 
     //unsigned char payloadOffset = 8 + data[5] & 0x07; //get FOpts len
 
