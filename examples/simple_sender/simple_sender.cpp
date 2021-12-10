@@ -45,6 +45,7 @@ void loop()
     LoRa.setPreambleLength(8);
     LoRa.setSyncWord(0x34);
     LoRa.enableCrc();
+    LoRa.disableInvertIQ();
     LoRa.setCodingRate4(5);
     LoRa.setSpreadingFactor(7);
     LoRa.setSignalBandwidth(125E3);
