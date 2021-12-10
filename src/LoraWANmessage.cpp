@@ -103,10 +103,10 @@ bool LoraWANmessage::checkHDR(char *data, uint8_t len)
     if (data[1] != DevAddr[3] || data[2] != DevAddr[2] || data[3] != DevAddr[1] || data[4] != DevAddr[0])
         return false; //Wrong DevAddr
 
-    uint16_t down = data[7] << 8 & data[6];
-    if (down <= frameCounterDown)
-        return false;        //message already recived
-    frameCounterDown = down; //get new counter value
+    uint16_t down = (data[7] << 8) | data[6];
+    if (down < frameCounterDown)
+        return false;            //message already recived
+    frameCounterDown = down + 1; //get new counter value
 
     //unsigned char mic[4];
     //calculateMIC(frameCounterDown, mic, 1);
