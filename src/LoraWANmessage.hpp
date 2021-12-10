@@ -3,7 +3,7 @@
 #include "AES-128.h"
 #include "inttypes.h"
 
-#define MAX_DATA_SIZE 60
+#define MAX_DATA_SIZE 235
 
 class LoraWANmessage
 {
