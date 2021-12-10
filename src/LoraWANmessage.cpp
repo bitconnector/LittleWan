@@ -51,9 +51,9 @@ void LoraWANmessage::setMIC()
 void LoraWANmessage::setMHDR(bool confirm)
 {
     if (confirm)
-        data[0] = 0x40; //confirmed uplink
+        data[0] = 0x80; //confirmed uplink
     else
-        data[0] = 0x80; //unconfirmed uplink
+        data[0] = 0x40; //unconfirmed uplink
 }
 
 void LoraWANmessage::setFHDR(unsigned char FCtrl, char *FOpts)
