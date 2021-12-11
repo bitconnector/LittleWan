@@ -96,6 +96,9 @@ char LoraWANmessage::getFtype(char data)
 
 bool LoraWANmessage::checkHDR(char *data, uint8_t len)
 {
+    if (len < 11) //too small for a LoraWan packet
+        return false;
+
     char mhdr = getFtype(data[0]);
     if (mhdr != 0x60 && mhdr != 0xA0) //unc down || conf down
         return false;                 //MHDR.FType doesnt match uplink
