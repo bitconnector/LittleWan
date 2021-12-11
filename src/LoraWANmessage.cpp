@@ -5,8 +5,10 @@ LoraWANmessage::~LoraWANmessage() {}
 
 void LoraWANmessage::setDevAddr(const char *devAddr_in)
 {
-    for (uint8_t i = 0; i < 4; ++i)
-        DevAddr[i] = ASCII2Hex(&devAddr_in[i * 2]);
+    DevAddr[0]=ASCII2Hex(&devAddr_in[3 * 2]);
+    DevAddr[1]=ASCII2Hex(&devAddr_in[2 * 2]);
+    DevAddr[2]=ASCII2Hex(&devAddr_in[1 * 2]);
+    DevAddr[3]=ASCII2Hex(&devAddr_in[0 * 2]);
 }
 
 void LoraWANmessage::setNwkSKey(const char *NwkKey_in)
@@ -65,10 +67,10 @@ void LoraWANmessage::setMHDR(bool confirm)
 
 void LoraWANmessage::setFHDR(unsigned char FCtrl, char *FOpts)
 {
-    data[1] = DevAddr[3]; //[1-4] FHDR.DevAddr
-    data[2] = DevAddr[2];
-    data[3] = DevAddr[1];
-    data[4] = DevAddr[0];
+    data[1] = DevAddr[0]; //[1-4] FHDR.DevAddr
+    data[2] = DevAddr[1];
+    data[3] = DevAddr[2];
+    data[4] = DevAddr[3];
     data[5] = FCtrl;          //[5] FHDR.FCtrl (frame control)
     data[6] = frameCounterUp; //[6-7] FHDR.FCnt (frame counter)
     data[7] = frameCounterUp >> 8;
@@ -103,8 +105,10 @@ bool LoraWANmessage::checkHDR(char *data, uint8_t len)
     if (mhdr != 0x60 && mhdr != 0xA0) //unc down || conf down
         return false;                 //MHDR.FType doesnt match uplink
 
-    if (data[1] != DevAddr[3] || data[2] != DevAddr[2] || data[3] != DevAddr[1] || data[4] != DevAddr[0])
-        return false; //Wrong DevAddr
+    unsigned char *dataDevAddr = (unsigned char *)&data[1];
+    for (int i = 0; i < 4; i++)
+        if (dataDevAddr[i] != DevAddr[i])
+            return false; //wrong DevAddr
 
     uint16_t down = (data[7] << 8) | data[6];
     if (down < frameCounterDown)
@@ -150,10 +154,10 @@ void LoraWANmessage::calculateMIC(char *data, uint8_t len, uint16_t counter, uns
     MIC_Data[0] = 0x49;
     // MIC_Data[1-4] = 0;
     MIC_Data[5] = direction; //direction 0=DOWN-link!!!
-    MIC_Data[6] = DevAddr[3];
-    MIC_Data[7] = DevAddr[2];
-    MIC_Data[8] = DevAddr[1];
-    MIC_Data[9] = DevAddr[0];
+    MIC_Data[6] = DevAddr[0];
+    MIC_Data[7] = DevAddr[1];
+    MIC_Data[8] = DevAddr[2];
+    MIC_Data[9] = DevAddr[3];
     MIC_Data[10] = counter;
     MIC_Data[11] = counter >> 8;
     //MIC_Data[12-13] = 0; //Frame counter upper bytes
@@ -250,10 +254,10 @@ void LoraWANmessage::Encrypt_Payload(unsigned char *Buffer, unsigned char buffer
         //Block_A[1-4] = 0;
         Block_A[5] = direction;
 
-        Block_A[6] = DevAddr[3];
-        Block_A[7] = DevAddr[2];
-        Block_A[8] = DevAddr[1];
-        Block_A[9] = DevAddr[0];
+        Block_A[6] = DevAddr[0];
+        Block_A[7] = DevAddr[1];
+        Block_A[8] = DevAddr[2];
+        Block_A[9] = DevAddr[3];
 
         Block_A[10] = counter;
         Block_A[11] = counter >> 8;
