@@ -22,6 +22,7 @@ public:
     void setOTAA(const char *devEUI_in, const char *joinEUI_in, const char *appKey_in);
 
     void joinmsg();
+    bool checkJoin(char *data, uint8_t len);
 
     void setDevNonce(uint16_t nonce);
 };
