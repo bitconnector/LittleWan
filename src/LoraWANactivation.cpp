@@ -134,27 +134,20 @@ bool LoraWANactivation::checkJoin(char *data, uint8_t len)
     for (i = 0; i < 4; i++)
         MSG->DevAddr[i] = MSG->data[i + 7];
 
-    //Calculate Network Session Key
-    MSG->NwkSKey[0] = 0x01;
-    for (i = 0; i < 3; i++) //Load AppNonce
-        MSG->NwkSKey[i + 1] = MSG->data[i + 1];
-    for (i = 0; i < 3; i++) //Load NetID
-        MSG->NwkSKey[i + 4] = MSG->data[i + 4];
+    MSG->NwkSKey[0] = 0x01; //Change first byte of NwkSKey
+    for (i = 1; i < 7; i++) //Load AppNonce and NetID
+        MSG->NwkSKey[i] = MSG->data[i];
 
-    //Load Dev Nonce
-    MSG->NwkSKey[7] = DevNonce;
+    MSG->NwkSKey[7] = DevNonce; //Load Dev Nonce
     MSG->NwkSKey[8] = DevNonce >> 8;
 
-    //Pad with zeros
-    for (i = 9; i <= 15; i++)
+    for (i = 9; i <= 15; i++) //Pad with zeros
         MSG->NwkSKey[i] = 0x00;
 
-    //Copy to AppSkey
-    for (i = 0x00; i < 16; i++)
+    for (i = 0; i < 16; i++) //Copy to AppSkey
         MSG->AppSKey[i] = MSG->NwkSKey[i];
 
-    //Change first byte of AppSKey
-    MSG->AppSKey[0] = 0x02;
+    MSG->AppSKey[0] = 0x02; //Change first byte of AppSKey
 
     //Calculate the keys
     AES_Encrypt(MSG->NwkSKey, AppKey);
