@@ -189,7 +189,7 @@ void LoraWANmessage::calculateMIC(char *data, uint8_t len, uint16_t counter, uns
 
     AES_Encrypt(MIC_Data, NwkSKey);
 
-    for (uint8_t j = 0; j < (Number_of_Blocks); j++)
+    for (uint8_t j = 0; j < Number_of_Blocks; j++)
     {
         for (uint8_t i = 0; i < 16; i++) //Copy new data and XOR with old
         {
