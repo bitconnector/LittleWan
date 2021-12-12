@@ -43,11 +43,12 @@ void LoraWANmessage::setAPB(const char *devAddr_in, const char *NwkKey_in, const
 void LoraWANmessage::setFRMPayload(uint8_t port, char *buf, uint8_t size)
 {
     data[dataLen++] = port;
-    if (size != 0)
-        Encrypt_Payload((unsigned char *)buf, size, AppSKey, frameCounterUp);
-
     for (int i = 0; i < size; i++)
         data[i + dataLen] = buf[i];
+
+    if (size != 0)
+        Encrypt_Payload(&data[dataLen], size, AppSKey, frameCounterUp);
+
     dataLen += size;
 }
 
