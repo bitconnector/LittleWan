@@ -255,15 +255,18 @@ void LoraWANmessage::Encrypt_Payload(unsigned char *Buffer, unsigned char buffer
     unsigned char Block_A[16] = {0};
 
     //Calculate number of blocks
-    unsigned char Number_of_Blocks = counter / 16;
-    unsigned char Incomplete_Block_Size = counter % 16;
-    if (Incomplete_Block_Size != 0)
+    unsigned char Number_of_Blocks = buffer_size / 16;
+    if ((buffer_size % 16) != 0)
         Number_of_Blocks++;
 
     for (i = 0; i < Number_of_Blocks; i++)
     {
         Block_A[0] = 0x01;
-        //Block_A[1-4] = 0;
+        Block_A[1] = 0;
+        Block_A[2] = 0;
+        Block_A[3] = 0;
+        Block_A[4] = 0;
+
         Block_A[5] = direction;
 
         Block_A[6] = DevAddr[0];
@@ -273,8 +276,10 @@ void LoraWANmessage::Encrypt_Payload(unsigned char *Buffer, unsigned char buffer
 
         Block_A[10] = counter;
         Block_A[11] = counter >> 8;
-        //Block_A[12-13] = 0x00; //Frame counter upper Bytes
-        //Block_A[14] = 0;
+        Block_A[12] = 0x00; //Frame counter upper Bytes
+        Block_A[13] = 0x00;
+
+        Block_A[14] = 0;
 
         Block_A[15] = i + 1;
 
