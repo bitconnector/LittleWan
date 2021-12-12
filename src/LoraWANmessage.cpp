@@ -176,13 +176,11 @@ void LoraWANmessage::calculateMIC(char *data, uint8_t len, uint16_t counter, uns
     //MIC_Data[14] = 0;
     MIC_Data[15] = len;
 
-    unsigned char mic_size = 16 + len;
-
     unsigned char Key_K1[16] = {0};
     unsigned char Key_K2[16] = {0};
 
-    unsigned char Number_of_Blocks = mic_size / 16;
-    unsigned char Incomplete_Block_Size = mic_size % 16;
+    unsigned char Number_of_Blocks = len / 16;
+    unsigned char Incomplete_Block_Size = len % 16;
     if (Incomplete_Block_Size != 0)
         Number_of_Blocks++;
 
@@ -190,7 +188,6 @@ void LoraWANmessage::calculateMIC(char *data, uint8_t len, uint16_t counter, uns
     unsigned char *key = Key_K2;
 
     AES_Encrypt(MIC_Data, NwkSKey);
-    Number_of_Blocks--;
 
     for (uint8_t j = 0; j < (Number_of_Blocks); j++)
     {
