@@ -22,7 +22,7 @@ void LoraWANactivation::setJoinEUI(const char *joinEUI_in)
 void LoraWANactivation::setAppKey(const char *appKey_in)
 {
     for (uint8_t i = 0; i < 16; ++i)
-        AppKey[i] = MSG->ASCII2Hex(&appKey_in[(15 - i) * 2]);
+        AppKey[i] = MSG->ASCII2Hex(&appKey_in[i * 2]);
 }
 
 void LoraWANactivation::setOTAA(const char *devEUI_in, const char *joinEUI_in, const char *appKey_in)
