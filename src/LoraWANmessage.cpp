@@ -5,10 +5,10 @@ LoraWANmessage::~LoraWANmessage() {}
 
 void LoraWANmessage::setDevAddr(const char *devAddr_in)
 {
-    DevAddr[0]=ASCII2Hex(&devAddr_in[3 * 2]);
-    DevAddr[1]=ASCII2Hex(&devAddr_in[2 * 2]);
-    DevAddr[2]=ASCII2Hex(&devAddr_in[1 * 2]);
-    DevAddr[3]=ASCII2Hex(&devAddr_in[0 * 2]);
+    DevAddr[0] = ASCII2Hex(&devAddr_in[3 * 2]);
+    DevAddr[1] = ASCII2Hex(&devAddr_in[2 * 2]);
+    DevAddr[2] = ASCII2Hex(&devAddr_in[1 * 2]);
+    DevAddr[3] = ASCII2Hex(&devAddr_in[0 * 2]);
 }
 
 void LoraWANmessage::setNwkSKey(const char *NwkKey_in)
@@ -94,6 +94,11 @@ void LoraWANmessage::uplink(char *data, uint8_t len, uint8_t port, bool confirm)
 char LoraWANmessage::getFtype(char data)
 {
     return data & 0b11100000;
+}
+
+unsigned char LoraWANmessage::getFoptsLen(char data)
+{
+    return data & 0x07;
 }
 
 bool LoraWANmessage::checkHDR(char *data, uint8_t len)

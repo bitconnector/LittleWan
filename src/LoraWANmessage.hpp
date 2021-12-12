@@ -39,6 +39,7 @@ public:
 
     bool checkHDR(char *data, uint8_t len);
     char getFtype(char data);
+    unsigned char getFoptsLen(char data);
 
     void calculateMIC(char *data, uint8_t len, uint16_t counter, unsigned char *mic, bool direction = 0); //default Down
     void Encrypt_Payload(unsigned char *Buffer, unsigned char buffer_size, unsigned char *Key, uint16_t counter, bool direction = 0);
