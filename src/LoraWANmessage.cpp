@@ -252,10 +252,9 @@ void LoraWANmessage::Shift_Left(unsigned char *Data)
 void LoraWANmessage::Encrypt_Payload(unsigned char *Buffer, unsigned char buffer_size, unsigned char *Key, uint16_t counter, bool direction)
 {
     unsigned char j, i, idx;
-    unsigned char Block_A[16] = {0};
+    unsigned char Block_A[16];
 
-    //Calculate number of blocks
-    unsigned char Number_of_Blocks = buffer_size / 16;
+    unsigned char Number_of_Blocks = buffer_size / 16; //Calculate number of blocks
     if ((buffer_size % 16) != 0)
         Number_of_Blocks++;
 
