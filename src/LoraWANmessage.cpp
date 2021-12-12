@@ -162,7 +162,7 @@ unsigned char LoraWANmessage::ASCII2Hex(const char str[2])
 
 void LoraWANmessage::calculateMIC(char *data, uint8_t len, uint16_t counter, unsigned char *mic, bool direction)
 {
-    unsigned char MIC_Data[((MAX_DATA_SIZE / 16) + 1) * 16] = {0};
+    unsigned char MIC_Data[16] = {0};
     MIC_Data[0] = 0x49;
     // MIC_Data[1-4] = 0;
     MIC_Data[5] = direction; //direction 0=DOWN-link!!!
@@ -175,15 +175,11 @@ void LoraWANmessage::calculateMIC(char *data, uint8_t len, uint16_t counter, uns
     //MIC_Data[12-13] = 0; //Frame counter upper bytes
     //MIC_Data[14] = 0;
     MIC_Data[15] = len;
-    for (int i = 0; i < len; i++) //copy the the payload
-        MIC_Data[i + 16] = data[i];
 
     unsigned char mic_size = 16 + len;
-    MIC_Data[mic_size] = 0x80;
 
     unsigned char Key_K1[16] = {0};
     unsigned char Key_K2[16] = {0};
-    unsigned char New_Data[16] = {0};
 
     unsigned char Number_of_Blocks = mic_size / 16;
     unsigned char Incomplete_Block_Size = mic_size % 16;
@@ -192,22 +188,35 @@ void LoraWANmessage::calculateMIC(char *data, uint8_t len, uint16_t counter, uns
 
     Generate_Keys(NwkSKey, Key_K1, Key_K2);
     unsigned char *key = Key_K2;
+
+    AES_Encrypt(MIC_Data, NwkSKey);
+    Number_of_Blocks--;
+
     for (uint8_t j = 0; j < (Number_of_Blocks); j++)
     {
         for (uint8_t i = 0; i < 16; i++) //Copy new data and XOR with old
-            New_Data[i] ^= MIC_Data[(j * 16) + i];
+        {
+            uint8_t dataptr = (j * 16) + i;
+            if (dataptr == len)
+            {
+                MIC_Data[i] ^= 0x80;
+                break;
+            }
+            MIC_Data[i] ^= data[dataptr];
+        }
+
         if (j == (Number_of_Blocks - 1))
         {
-            if (Incomplete_Block_Size == 0)
+            if ((len % 16) == 0)
                 key = Key_K1;
             for (int i = 0; i < 16; i++)
-                New_Data[i] ^= key[i];
+                MIC_Data[i] ^= key[i];
         }
-        AES_Encrypt(New_Data, NwkSKey);
+        AES_Encrypt(MIC_Data, NwkSKey);
     }
 
     for (int8_t i = 0; i < 4; i++)
-        mic[i] = New_Data[i];
+        mic[i] = MIC_Data[i];
 }
 
 void LoraWANmessage::Generate_Keys(unsigned char *Key, unsigned char *K1, unsigned char *K2)
