@@ -1,6 +1,12 @@
 #include "LoraWANmessage.hpp"
 
 LoraWANmessage::LoraWANmessage() {}
+
+LoraWANmessage::LoraWANmessage(unsigned char *_data)
+{
+    data = _data;
+}
+
 LoraWANmessage::~LoraWANmessage() {}
 
 void LoraWANmessage::setDevAddr(const char *devAddr_in)
