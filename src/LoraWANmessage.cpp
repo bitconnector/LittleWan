@@ -4,6 +4,8 @@ LoraWANmessage::LoraWANmessage() {}
 
 LoraWANmessage::LoraWANmessage(unsigned char *_data)
 {
+    frameCounterDown = 0;
+    frameCounterUp = 0;
     data = _data;
 }
 

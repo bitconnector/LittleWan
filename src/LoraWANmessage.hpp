@@ -11,8 +11,8 @@ public:
     unsigned char NwkSKey[16];
     unsigned char AppSKey[16];
     unsigned char DevAddr[4];
-    uint16_t frameCounterUp = 0;
-    uint16_t frameCounterDown = 0;
+    uint16_t frameCounterUp;
+    uint16_t frameCounterDown;
     unsigned char *data;
     unsigned char *payload;
     unsigned char dataLen = 0;
