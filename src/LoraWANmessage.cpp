@@ -231,7 +231,7 @@ void LoraWANmessage::Generate_Keys(unsigned char *Key, unsigned char *K1, unsign
     if (MSB_Key == 1)
         K1[15] = K1[15] ^ 0x87;
 
-    for (char i = 0; i < 16; i++)
+    for (unsigned char i = 0; i < 16; i++)
         K2[i] = K1[i];
 
     if (K2[0] > 0x7F)
