@@ -301,3 +301,33 @@ void LoraWANmessage::Encrypt_Payload(unsigned char *Buffer, unsigned char buffer
         }
     }
 }
+
+#ifdef LITTLEWANDEBUGPORT
+void printPackage(char *data, uint16_t size, bool structure)
+{
+    LITTLEWANDEBUGPORT.print("+ Package:");
+    for (int i = 0; i < size; i++)
+        LITTLEWANDEBUGPORT.printf(" %02x", data[i]);
+    if (structure)
+    {
+        LITTLEWANDEBUGPORT.print("\n          |hd|   addr    |Ct| FCnt|");
+        if (size < 13)
+        {
+            LITTLEWANDEBUGPORT.println("    MIC    |");
+        }
+        else if (size == 13)
+        {
+            LITTLEWANDEBUGPORT.println("Pt|    MIC    |");
+        }
+        else
+        {
+            LITTLEWANDEBUGPORT.print("Pt|");
+            for (int i = 14; i < size; i++)
+                LITTLEWANDEBUGPORT.print("   ");
+            LITTLEWANDEBUGPORT.println("  |    MIC    |");
+        }
+    }
+    else
+        LITTLEWANDEBUGPORT.println();
+}
+#endif

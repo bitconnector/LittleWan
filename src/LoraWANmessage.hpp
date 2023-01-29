@@ -49,3 +49,8 @@ public:
     void Generate_Keys(unsigned char *Key, unsigned char *K1, unsigned char *K2);
     void Shift_Left(unsigned char *Data);
 };
+
+#ifdef LITTLEWANDEBUGPORT
+#include <Arduino.h>
+void printPackage(char *data, uint16_t size, bool structure);
+#endif
