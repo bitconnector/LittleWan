@@ -4,13 +4,11 @@
 #include <LoraWANactivation.hpp>
 
 #define RF_FREQUENCY 868100000 // Hz
-
 #define TX_OUTPUT_POWER 20 // dBm
+#define SF_RATE 8
 
 #define BUFFER_SIZE 30 // Define the payload size here
-
 char txpacket[BUFFER_SIZE];
-char rxpacket[BUFFER_SIZE];
 
 static RadioEvents_t RadioEvents;
 void OnTxDone(void);
@@ -139,15 +137,14 @@ void OnRxDone(uint8_t *payload, uint16_t size, int16_t rssi, int8_t snr)
 
   Serial.println("received packet");
   printPackage((char *)message.data, message.dataLen, 0);
-
   radioBusy = 0;
 }
 
 void sendPackage(unsigned char *msg, unsigned char len, uint32_t freq)
 {
   Radio.SetChannel(freq);
-  Radio.SetTxConfig(MODEM_LORA, 14, 0, 0,
-                    8, 1,
+  Radio.SetTxConfig(MODEM_LORA, TX_OUTPUT_POWER, 0, 0,
+                    SF_RATE, 1,
                     8, false,
                     true, 0, 0, false, 3000);
   Radio.SetSyncWord(0x34);
@@ -158,7 +155,7 @@ void sendPackage(unsigned char *msg, unsigned char len, uint32_t freq)
 void setReceive(uint32_t freq)
 {
   Radio.SetChannel(freq);
-  Radio.SetRxConfig(MODEM_LORA, 0, 8,
+  Radio.SetRxConfig(MODEM_LORA, 0, SF_RATE,
                     1, 0, 8,
                     0, false,
                     0, false, 0, 0, true, true);
