@@ -1,3 +1,11 @@
+/*
+ * if you are using platformio you have to add these lines to the platformio.ini
+board_build.arduino.lorawan.region = EU868
+board_build.arduino.lorawan.adr = ON
+board_build.arduino.lorawan.debug_level = NONE
+board_build.arduino.lorawan.rgb = OFF
+*/
+
 #include "LoRaWan_APP.h"
 #include "Arduino.h"
 
@@ -67,9 +75,9 @@ void setup()
 
   message = LoraWANmessage(Buffer);
   otaa = LoraWANactivation(&message);
-  otaa.setDevEUI("70B3D57ED0059581");
+  otaa.setDevEUI("70B3D57ED0049D49");
   otaa.setJoinEUI("0000000000000000");
-  otaa.setAppKey("D5125A5D9A89D819AA2AE471D86CAA62");
+  otaa.setAppKey("ACBE2240FF67B00AB0377E547B65AA6B");
 
   // JOINING
   otaa.setDevNonce((uint16_t)random(256 * 256));
